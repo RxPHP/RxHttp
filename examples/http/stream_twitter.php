@@ -28,7 +28,9 @@ $headers  = [
     'Content-Length' => strlen($postData),
 ];
 
-$source = \Rx\React\Http::post($url, $postData, $headers, '1.1', false)->share();
+$source = \Rx\React\Http::post($url, $postData, $headers, '1.1')
+    ->streamResults()
+    ->share();
 
 $connected = $source->take(1)->doOnNext(function () {
     echo 'Connected to twitter, listening in on stream:', PHP_EOL;

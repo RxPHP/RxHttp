@@ -2,8 +2,7 @@
 
 include __DIR__ . '/../../vendor/autoload.php';
 
-$bufferResult = false;
-$source       = \Rx\React\Http::get('http://download.xs4all.nl/test/100MiB.bin', [], null, $bufferResult);
+$source       = \Rx\React\Http::get('http://download.xs4all.nl/test/100MiB.bin')->streamResults();
 $start        = time();
 $size         = 0;
 

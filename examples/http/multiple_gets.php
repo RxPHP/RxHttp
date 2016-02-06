@@ -1,0 +1,25 @@
+<?php
+
+include __DIR__ . '/../../vendor/autoload.php';
+
+
+$imageTypes = ["png", "jpeg", "webp"];
+
+$images = \Rx\Observable::fromArray($imageTypes)
+    ->flatMap(function ($type) {
+        return \Rx\React\Http::get("http://httpbin.org/image/{$type}")->map(function ($image) use ($type) {
+            return [$type => $image];
+        });
+    });
+
+$images->subscribeCallback(
+    function ($data) {
+        echo "Got Image: ", array_keys($data)[0], PHP_EOL;
+    },
+    function (\Exception $e) {
+        echo $e->getMessage(), PHP_EOL;
+    },
+    function () {
+        echo "completed", PHP_EOL;
+    }
+);

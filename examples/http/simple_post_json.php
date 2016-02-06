@@ -2,7 +2,10 @@
 
 include __DIR__ . '/../../vendor/autoload.php';
 
-$source = \Rx\React\Http::get('https://www.google.com/');
+$postData = json_encode(["test" => "data"]);
+$headers  = ['Content-Type' => 'application/json'];
+
+$source = \Rx\React\Http::post('https://www.example.com/', $postData, $headers);
 
 $source->subscribeCallback(
     function ($data) {

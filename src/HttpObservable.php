@@ -30,10 +30,13 @@ class HttpObservable extends Observable
     /** @var  boolean */
     private $bufferResults;
 
+    /** @var  boolean */
+    private $includeResponse;
+
     /** @var \React\HttpClient\Client */
     private $client;
 
-    public function __construct($method, $url, $body = null, array $headers = [], $protocolVersion = '1.0', $bufferResults = true)
+    public function __construct($method, $url, $body = null, array $headers = [], $protocolVersion = '1.0', $bufferResults = true, $includeResponse = false)
     {
         $this->method          = $method;
         $this->url             = $url;
@@ -41,6 +44,7 @@ class HttpObservable extends Observable
         $this->headers         = $headers;
         $this->protocolVersion = $protocolVersion;
         $this->bufferResults   = $bufferResults;
+        $this->includeResponse = $includeResponse;
 
         $loop               = \EventLoop\getLoop();
         $dnsResolverFactory = new Factory();
@@ -68,11 +72,11 @@ class HttpObservable extends Observable
                     $observer->onError($error);
                     return;
                 }
-                //@todo need a way to also sent the response
 
                 if ($this->bufferResults) {
                     $buffer .= $data;
                 } else {
+                    $data = $this->includeResponse ? [$data, $response, $request] : $data;
                     $observer->onNext($data);
                 }
             });
@@ -83,10 +87,11 @@ class HttpObservable extends Observable
 
             });
 
-            $response->on('end', function ($end = null) use (&$buffer, $observer) {
+            $response->on('end', function ($end = null) use (&$buffer, $observer, $request, $response) {
 
                 if ($this->bufferResults) {
-                    $observer->onNext($buffer);
+                    $data = $this->includeResponse ? [$buffer, $response, $request] : $buffer;
+                    $observer->onNext($data);
                 }
 
                 $observer->onCompleted();
@@ -98,5 +103,29 @@ class HttpObservable extends Observable
         return new CallbackDisposable(function () use ($request) {
             $request->close();
         });
+    }
+
+    /**
+     * Will not buffer the result.
+     *
+     * @return $this
+     */
+    public function streamResults()
+    {
+        $this->bufferResults = false;
+
+        return $this;
+    }
+
+    /**
+     * The observable will emit an array that includes the data, request, and response.
+     *
+     * @return $this
+     */
+    public function includeResponse()
+    {
+        $this->includeResponse = true;
+
+        return $this;
     }
 }
