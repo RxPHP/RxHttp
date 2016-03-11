@@ -103,9 +103,14 @@ class HttpObservable extends Observable
 
                 if ($this->bufferResults) {
                     $data = $this->includeResponse ? [$buffer, $response, $request] : $buffer;
-                    $scheduler->schedule(function () use ($observer, $data) {
+                    $scheduler->schedule(function () use ($observer, $data, $scheduler) {
                         $observer->onNext($data);
+                        $scheduler->schedule(function () use ($observer) {
+                            $observer->onCompleted();
+                        });
                     });
+
+                    return;
                 }
 
                 $scheduler->schedule(function () use ($observer) {
