@@ -17,9 +17,9 @@ class HttpObservableTest extends TestCase
      */
     public function http_with_buffer()
     {
-        $testData1 = str_repeat("1", 1000);
-        $testData2 = str_repeat("1", 1000);
-        $testData3 = str_repeat("1", 1000);
+        $testData1 = str_repeat("1", 69536);
+        $testData2 = str_repeat("1", 69536);
+        $testData3 = str_repeat("1", 69536);
 
         $error = false;
 
@@ -60,7 +60,7 @@ class HttpObservableTest extends TestCase
      */
     public function http_without_buffer()
     {
-        $testData = str_repeat("1", 1000); //1k, so it does not use the buffer
+        $testData = str_repeat("1", 69536); //1k, so it does not use the buffer
         $error    = false;
 
         $method      = "GET";
@@ -97,9 +97,9 @@ class HttpObservableTest extends TestCase
      */
     public function http_with_stream()
     {
-        $testData1 = str_repeat("1", 1000);
-        $testData2 = str_repeat("1", 1000);
-        $testData3 = str_repeat("1", 1000);
+        $testData1 = str_repeat("1", 69536);
+        $testData2 = str_repeat("1", 69536);
+        $testData3 = str_repeat("1", 69536);
 
         $error   = false;
         $result  = false;
@@ -147,7 +147,7 @@ class HttpObservableTest extends TestCase
      */
     public function http_with_error()
     {
-        $testData = str_repeat("1", 1000); //1k, so it does not use the buffer
+        $testData = str_repeat("1", 69536); //1k, so it does not use the buffer
         $error    = false;
         $complete = false;
 
@@ -185,7 +185,7 @@ class HttpObservableTest extends TestCase
      */
     public function http_with_includeResponse()
     {
-        $testData = str_repeat("1", 1000); //1k, so it does not use the buffer
+        $testData = str_repeat("1", 69536); //1k, so it does not use the buffer
         $error    = false;
         $complete = false;
 
@@ -226,9 +226,9 @@ class HttpObservableTest extends TestCase
      */
     public function http_with_includeResponse_with_buffer()
     {
-        $testData1 = str_repeat("1", 1000);
-        $testData2 = str_repeat("1", 1000);
-        $testData3 = str_repeat("1", 1000);
+        $testData1 = str_repeat("1", 69536);
+        $testData2 = str_repeat("1", 69536);
+        $testData3 = str_repeat("1", 69536);
         $complete  = false;
         $error     = false;
 
