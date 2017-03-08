@@ -69,11 +69,10 @@ class HttpObservable extends Observable
             $response->on('data', function ($data, Response $response) use (&$buffer, $observer, $request, $scheduler) {
 
                 try {
-                    //Http Errors
+                    //Buffer the data if we get a http error
                     $code = $response->getCode();
                     if ($code < 200 || $code >= 400) {
-                        $error = new HttpResponseException($request, $response, $response->getReasonPhrase(), $response->getCode());
-                        $observer->onError($error);
+                        $buffer .= $data;
                         return;
                     }
 
@@ -98,6 +97,13 @@ class HttpObservable extends Observable
             });
 
             $response->on('end', function ($end = null) use (&$buffer, $observer, $request, $response, $scheduler) {
+
+                $code = $response->getCode();
+                if ($code < 200 || $code >= 400) {
+                    $error = new HttpResponseException($request, $response, $response->getReasonPhrase(), $response->getCode(), $buffer);
+                    $observer->onError($error);
+                    return;
+                }
 
                 if ($this->bufferResults) {
                     $data = $this->includeResponse ? [$buffer, $response, $request] : $buffer;

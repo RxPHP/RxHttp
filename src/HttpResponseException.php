@@ -7,38 +7,30 @@ use React\HttpClient\Response;
 
 class HttpResponseException extends \Exception
 {
-
-    /** @var  Request */
     private $request;
-
-    /** @var Response */
     private $response;
+    private $body;
 
-    /**
-     * HttpResponseException constructor.
-     */
-    public function __construct(Request $request, Response $response, $message = "", $code = 0, \Exception $previous = null)
+    public function __construct(Request $request, Response $response, string $message = "", int $code = 0, string $body = null, \Exception $previous = null)
     {
         $this->request  = $request;
         $this->response = $response;
+        $this->body     = $body;
         parent::__construct($message, $code, $previous);
     }
 
-    /**
-     * @return Response
-     */
-    public function getResponse()
+    public function getResponse(): Response
     {
         return $this->response;
     }
 
-    /**
-     * @return Request
-     */
-    public function getRequest()
+    public function getRequest(): Request
     {
         return $this->request;
     }
 
-
+    public function getBody(): string
+    {
+        return $this->body;
+    }
 }
