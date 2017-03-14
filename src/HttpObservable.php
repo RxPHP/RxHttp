@@ -10,7 +10,6 @@ use Rx\Observable;
 use Rx\ObserverInterface;
 use Rx\Scheduler;
 use Rx\SchedulerInterface;
-use WyriHaximus\React\AsyncInteropLoop\AsyncInteropLoop;
 
 class HttpObservable extends Observable
 {
@@ -52,7 +51,7 @@ class HttpObservable extends Observable
         $this->includeResponse = $includeResponse;
         $this->scheduler       = $scheduler ?: Scheduler::getDefault();
 
-        $loop               = new AsyncInteropLoop();
+        $loop               = \EventLoop\getLoop();
         $dnsResolverFactory = new Factory();
         $dnsResolver        = $dnsResolverFactory->createCached('8.8.8.8', $loop);
         $factory            = new \React\HttpClient\Factory();
