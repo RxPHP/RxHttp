@@ -6,7 +6,7 @@ $source       = \Rx\React\Http::get('http://download.xs4all.nl/test/100MiB.bin')
 $start        = time();
 $size         = 0;
 
-$source->subscribeCallback(
+$source->subscribe(
     function ($data) use (&$size) {
         $size += strlen($data);
         echo "\033[1A", 'Downloaded size: ', number_format($size / 1024 / 1024, 2, '.', ''), 'MB', PHP_EOL;

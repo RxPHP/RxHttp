@@ -7,7 +7,7 @@ $headers  = ['Content-Type' => 'application/json'];
 
 $source = \Rx\React\Http::post('https://www.example.com/', $postData, $headers);
 
-$source->subscribeCallback(
+$source->subscribe(
     function ($data) {
         echo $data, PHP_EOL;
     },

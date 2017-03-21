@@ -12,7 +12,7 @@ $images = \Rx\Observable::fromArray($imageTypes)
         });
     });
 
-$images->subscribeCallback(
+$images->subscribe(
     function ($data) {
         echo "Got Image: ", array_keys($data)[0], PHP_EOL;
     },

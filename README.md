@@ -19,7 +19,7 @@ Install dependencies using [composer](https://getcomposer.org/doc/00-intro.md#do
     
 $source = \Rx\React\Http::get('https://www.example.com/');
 
-$source->subscribeCallback(
+$source->subscribe(
     function ($data) {
         echo $data, PHP_EOL;
     },
@@ -41,7 +41,7 @@ $headers  = ['Content-Type' => 'application/json'];
 
 $source = \Rx\React\Http::post('https://www.example.com/', $postData, $headers);
 
-$source->subscribeCallback(
+$source->subscribe(
     function ($data) {
         echo $data, PHP_EOL;
     },
@@ -68,7 +68,7 @@ $images = \Rx\Observable::fromArray($imageTypes)
         });
     });
 
-$images->subscribeCallback(
+$images->subscribe(
     function ($data) {
         echo "Got Image: ", array_keys($data)[0], PHP_EOL;
     },

@@ -32,15 +32,14 @@ $source = \Rx\React\Http::post($url, $postData, $headers, '1.1')
     ->streamResults()
     ->share();
 
-$connected = $source->take(1)->doOnNext(function () {
+$connected = $source->take(1)->do(function () {
     echo 'Connected to twitter, listening in on stream:', PHP_EOL;
 });
 
+/** @var \Rx\Observable $allTweets */
 $allTweets = $connected
     ->merge($source)
-    ->lift(function () {
-        return new \Rx\Extra\Operator\CutOperator(PHP_EOL);
-    })
+    ->cut(PHP_EOL)
     ->filter(function ($tweet) {
         return strlen(trim($tweet)) > 0;
     })
@@ -53,9 +52,9 @@ $endTwitterStream = $allTweets
         return is_object($tweet);
     })
     ->filter(function ($tweet) {
-        return trim($tweet->text) == 'exit();';
+        return trim($tweet->text) === 'exit();';
     })
-    ->doOnNext(function ($twitter) {
+    ->do(function ($twitter) {
         echo 'exit(); found, stopping...', PHP_EOL;
     });
 
@@ -78,7 +77,7 @@ $measurementsSubscription = $urls
         return \Rx\React\Http::get("https://atlas.ripe.net/api/v1/measurement/{$id}/");
     })->map(function ($data) {
         return json_decode($data);
-    })->subscribeCallback(
+    })->subscribe(
         function ($json) {
             echo 'Measurement #', $json->msm_id, ' "', $json->description, '" had ', $json->participant_count, ' nodes involved', PHP_EOL;
         },
@@ -99,7 +98,7 @@ $probesSubscription = $urls
         return \Rx\React\Http::get("https://atlas.ripe.net/api/v1/probe/{$id}/");
     })->map(function ($data) {
         return json_decode($data);
-    })->subscribeCallback(
+    })->subscribe(
         function ($json) {
             echo 'Probe #', $json->id, ' connected since ' . date('r', $json->status_since), PHP_EOL;
         },

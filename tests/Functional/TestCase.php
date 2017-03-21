@@ -7,6 +7,7 @@ namespace Rx\React\Tests\Functional;
 use React\HttpClient\Request;
 use React\Promise\Promise;
 use Rx\React\HttpObservable;
+use Rx\Scheduler;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
@@ -20,7 +21,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->connector = $this->getMock('React\SocketClient\ConnectorInterface');
+        $this->connector = $this->createMock('React\SocketClient\ConnectorInterface');
 
         $this->connector->expects($this->once())
             ->method('create')
@@ -57,7 +58,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'headers'         => $headers,
             'protocolVersion' => $protocolVersion,
             'bufferResults'   => $bufferResults,
-            'includeResponse' => $includeResponse
+            'includeResponse' => $includeResponse,
+            'scheduler'       => Scheduler::getImmediate()
         ];
 
         $httpObservable = $reflection->newInstanceWithoutConstructor();

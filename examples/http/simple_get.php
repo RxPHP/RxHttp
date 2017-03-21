@@ -4,7 +4,7 @@ include __DIR__ . '/../../vendor/autoload.php';
 
 $source = \Rx\React\Http::get('https://www.google.com/');
 
-$source->subscribeCallback(
+$source->subscribe(
     function ($data) {
         echo $data, PHP_EOL;
     },
