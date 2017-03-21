@@ -291,8 +291,8 @@ class HttpObservableTest extends TestCase
         $response->emit("end");
 
         $this->assertEquals($result[0], $testData);
-        $this->assertInstanceOf('React\HttpClient\Response', $result[1]);
-        $this->assertInstanceOf('React\HttpClient\Request', $result[2]);
+        $this->assertInstanceOf(Response::class, $result[1]);
+        $this->assertInstanceOf(Request::class, $result[2]);
         $this->assertTrue($complete);
         $this->assertFalse($error);
 
@@ -336,8 +336,8 @@ class HttpObservableTest extends TestCase
         $response->emit("end");
 
         $this->assertEquals($result[0], $testData1 . $testData2 . $testData3);
-        $this->assertInstanceOf('React\HttpClient\Response', $result[1]);
-        $this->assertInstanceOf('React\HttpClient\Request', $result[2]);
+        $this->assertInstanceOf(Response::class, $result[1]);
+        $this->assertInstanceOf(Request::class, $result[2]);
         $this->assertTrue($complete);
         $this->assertFalse($error);
 

@@ -37,7 +37,7 @@ class HttpObservable extends Observable
         string $url,
         string $body = null,
         array $headers = [],
-        string $protocolVersion = '1.0',
+        string $protocolVersion = '1.1',
         bool $bufferResults = true,
         bool $includeResponse = false,
         SchedulerInterface $scheduler = null
