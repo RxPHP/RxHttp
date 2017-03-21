@@ -28,6 +28,11 @@
       "Rx\\React\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Rx\\React\\Tests\\": "tests/"
+    }
+  },
   "require": {
     "PHP": "^7.0",
     "voryx/event-loop": "^2.0",
