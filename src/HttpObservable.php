@@ -168,7 +168,7 @@ class HttpObservable extends Observable
             return strtolower($header);
         }, array_keys($this->headers));
 
-        if (!isset($headers['content-length'])) {
+        if (!in_array('content-length', $headers)) {
             $this->headers['Content-Length'] = strlen($this->body);
         }
     }
