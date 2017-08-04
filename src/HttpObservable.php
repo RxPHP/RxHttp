@@ -60,6 +60,8 @@ class HttpObservable extends Observable
 
     protected function _subscribe(ObserverInterface $observer): DisposableInterface
     {
+        $this->setContentLength();
+
         $scheduler = $this->scheduler;
         $buffer    = '';
         $request   = $this->client->request($this->method, $this->url, $this->headers, $this->protocolVersion);
@@ -151,5 +153,23 @@ class HttpObservable extends Observable
         $this->includeResponse = true;
 
         return $this;
+    }
+
+    /**
+     * Adds if needed a `Content-Length` header field to the request.
+     */
+    private function setContentLength()
+    {
+        if (!is_string($this->body)) {
+            return;
+        }
+
+        $headers = array_map(function ($header) {
+            return strtolower($header);
+        }, array_keys($this->headers));
+
+        if (!isset($headers['content-length'])) {
+            $this->headers['Content-Length'] = strlen($this->body);
+        }
     }
 }
