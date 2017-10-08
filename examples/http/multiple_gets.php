@@ -3,7 +3,7 @@
 include __DIR__ . '/../../vendor/autoload.php';
 
 
-$imageTypes = ["png", "jpeg", "webp"];
+$imageTypes = ['png', 'jpeg', 'webp'];
 
 $images = \Rx\Observable::fromArray($imageTypes)
     ->flatMap(function ($type) {
@@ -14,12 +14,12 @@ $images = \Rx\Observable::fromArray($imageTypes)
 
 $images->subscribe(
     function ($data) {
-        echo "Got Image: ", array_keys($data)[0], PHP_EOL;
+        echo 'Got Image: ', array_keys($data)[0], PHP_EOL;
     },
-    function (\Exception $e) {
+    function (\Throwable $e) {
         echo $e->getMessage(), PHP_EOL;
     },
     function () {
-        echo "completed", PHP_EOL;
+        echo 'completed', PHP_EOL;
     }
 );

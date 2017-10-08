@@ -11,7 +11,7 @@ $source->subscribe(
         $size += strlen($data);
         echo "\033[1A", 'Downloaded size: ', number_format($size / 1024 / 1024, 2, '.', ''), 'MB', PHP_EOL;
     },
-    function (\Exception $e) {
+    function (\Throwable $e) {
         echo $e->getMessage();
     },
     function () use (&$size, $start) {

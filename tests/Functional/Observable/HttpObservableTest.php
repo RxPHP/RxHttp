@@ -343,4 +343,40 @@ class HttpObservableTest extends TestCase
 
     }
 
+    /**
+     * @test
+     */
+    public function http_post_with_content_length()
+    {
+        $testData = str_repeat('1', 69536); //1k, so it does not use the buffer
+        $error    = null;
+        $complete = false;
+
+        $method      = 'POST';
+        $url         = 'https://www.example.com';
+        $requestData = new RequestData($method, $url);
+        $request     = new Request($this->connector, $requestData);
+        $response    = new Response($this->stream, 'HTTP', '1.0', '500', 'OK', ['Content-Type' => 'text/plain']);
+        $source      = $this->createHttpObservable($request, $method, $url);
+
+        $source->subscribe(new CallbackObserver(
+            function ($value) use (&$result) {
+                $result = $value;
+            },
+            function (HttpResponseException $e) use (&$error) {
+                $error = $e;
+            },
+            function () use (&$complete) {
+                $complete = true;
+            }
+        ));
+
+        $request->emit('response', [$response]);
+        $response->emit('data', [$testData, $response]);
+        $response->emit('end');
+
+        $this->assertEquals($error->getBody(), $testData);
+        $this->assertFalse($complete);
+    }
+
 }

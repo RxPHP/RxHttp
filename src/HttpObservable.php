@@ -2,60 +2,35 @@
 
 namespace Rx\React;
 
-use React\Dns\Resolver\Factory;
+use React\HttpClient\Client;
 use React\HttpClient\Response;
 use Rx\Disposable\CallbackDisposable;
 use Rx\DisposableInterface;
 use Rx\Observable;
 use Rx\ObserverInterface;
 use Rx\Scheduler;
-use Rx\SchedulerInterface;
 
-class HttpObservable extends Observable
+final class HttpObservable extends Observable
 {
     private $method;
-
     private $url;
-
     private $body;
-
     private $headers;
-
     private $protocolVersion;
-
-    private $bufferResults;
-
-    private $includeResponse;
-
-    private $scheduler;
-
-    /** @var \React\HttpClient\Client */
     private $client;
+    private $scheduler;
+    private $includeResponse = false;
+    private $bufferResults = true;
 
-    public function __construct(
-        string $method,
-        string $url,
-        string $body = null,
-        array $headers = [],
-        string $protocolVersion = '1.1',
-        bool $bufferResults = true,
-        bool $includeResponse = false,
-        SchedulerInterface $scheduler = null
-    ) {
+    public function __construct(string $method, string $url, string $body = null, array $headers = [], string $protocolVersion = '1.1', Client $client)
+    {
         $this->method          = $method;
         $this->url             = $url;
         $this->body            = $body;
         $this->headers         = $headers;
         $this->protocolVersion = $protocolVersion;
-        $this->bufferResults   = $bufferResults;
-        $this->includeResponse = $includeResponse;
-        $this->scheduler       = $scheduler ?: Scheduler::getDefault();
-
-        $loop               = \EventLoop\getLoop();
-        $dnsResolverFactory = new Factory();
-        $dnsResolver        = $dnsResolverFactory->createCached('8.8.8.8', $loop);
-        $factory            = new \React\HttpClient\Factory();
-        $this->client       = $factory->create($loop, $dnsResolver);
+        $this->scheduler       = Scheduler::getDefault();
+        $this->client          = $client;
     }
 
     protected function _subscribe(ObserverInterface $observer): DisposableInterface
@@ -67,7 +42,7 @@ class HttpObservable extends Observable
         $request   = $this->client->request($this->method, $this->url, $this->headers, $this->protocolVersion);
 
         $request->on('response', function (Response $response) use (&$buffer, $observer, $request, $scheduler) {
-            $response->on('data', function ($data, Response $response) use (&$buffer, $observer, $request, $scheduler) {
+            $response->on('data', function ($data) use (&$buffer, $observer, $request, $scheduler, $response) {
 
                 try {
                     //Buffer the data if we get a http error
@@ -94,7 +69,6 @@ class HttpObservable extends Observable
             $response->on('error', function ($e) use ($observer) {
                 $error = new \Exception($e);
                 $observer->onError($error);
-
             });
 
             $response->on('end', function ($end = null) use (&$buffer, $observer, $request, $response, $scheduler) {
@@ -121,7 +95,6 @@ class HttpObservable extends Observable
                 $scheduler->schedule(function () use ($observer) {
                     $observer->onCompleted();
                 });
-
             });
         });
         $request->end($this->body);
@@ -136,7 +109,7 @@ class HttpObservable extends Observable
      *
      * @return $this
      */
-    public function streamResults()
+    public function streamResults(): self
     {
         $this->bufferResults = false;
 
@@ -148,7 +121,7 @@ class HttpObservable extends Observable
      *
      * @return $this
      */
-    public function includeResponse()
+    public function includeResponse(): self
     {
         $this->includeResponse = true;
 
@@ -166,7 +139,7 @@ class HttpObservable extends Observable
 
         $headers = array_map('strtolower', array_keys($this->headers));
 
-        if (!in_array('content-length', $headers)) {
+        if (!in_array('content-length', $headers, true)) {
             $this->headers['Content-Length'] = strlen($this->body);
         }
     }

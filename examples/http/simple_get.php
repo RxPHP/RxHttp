@@ -8,10 +8,10 @@ $source->subscribe(
     function ($data) {
         echo $data, PHP_EOL;
     },
-    function (\Exception $e) {
+    function (\Throwable $e) {
         echo $e->getMessage(), PHP_EOL;
     },
     function () {
-        echo "completed", PHP_EOL;
+        echo 'completed', PHP_EOL;
     }
 );

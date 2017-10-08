@@ -2,6 +2,10 @@
 
 //Requires jacobkiers/oauth and rx/operator-extras
 
+use Rx\Observable;
+use Rx\React\Http;
+use Rx\React\HttpResponseException;
+
 include __DIR__ . '/../../vendor/autoload.php';
 
 const TWITTER_USER_ID = -1; // Use http://gettwitterid.com/ to get the wanted twitter ID
@@ -28,29 +32,27 @@ $headers  = [
     'Content-Length' => strlen($postData),
 ];
 
-$source = \Rx\React\Http::post($url, $postData, $headers, '1.1')
+$source = Http::post($url, $postData, $headers)
     ->streamResults()
     ->share();
 
-$connected = $source->take(1)->do(function () {
-    echo 'Connected to twitter, listening in on stream:', PHP_EOL;
-});
+$connected = $source
+    ->take(1)
+    ->do(function () {
+        echo 'Connected to twitter, listening in on stream:', PHP_EOL;
+    });
 
-/** @var \Rx\Observable $allTweets */
+/** @var Observable $allTweets */
 $allTweets = $connected
     ->merge($source)
     ->cut(PHP_EOL)
     ->filter(function ($tweet) {
         return strlen(trim($tweet)) > 0;
     })
-    ->map(function ($tweet) {
-        return json_decode($tweet);
-    });
+    ->map('json_decode');
 
 $endTwitterStream = $allTweets
-    ->filter(function ($tweet) {
-        return is_object($tweet);
-    })
+    ->filter('is_object')
     ->filter(function ($tweet) {
         return trim($tweet->text) === 'exit();';
     })
@@ -65,47 +67,51 @@ $usersTweets = $allTweets->filter(function ($tweet) {
 $tweets = $usersTweets->takeUntil($endTwitterStream);
 
 $urls = $tweets->flatMap(function ($tweet) {
-    return \Rx\Observable::fromArray($tweet->entities->urls);
+    return Observable::fromArray($tweet->entities->urls);
 });
 
 $measurementsSubscription = $urls
     ->filter(function ($url) {
-        return substr($url->expanded_url, 0, 36) == 'https://atlas.ripe.net/measurements/';
-    })->map(function ($url) {
+        return 0 === strpos($url->expanded_url, 'https://atlas.ripe.net/measurements/');
+    })
+    ->map(function ($url) {
         return trim(substr($url->expanded_url, 36), '/');
-    })->flatMap(function ($id) {
-        return \Rx\React\Http::get("https://atlas.ripe.net/api/v1/measurement/{$id}/");
-    })->map(function ($data) {
-        return json_decode($data);
-    })->subscribe(
+    })
+    ->flatMap(function ($id) {
+        return Http::get("https://atlas.ripe.net/api/v1/measurement/{$id}/");
+    })
+    ->map('json_decode')
+    ->subscribe(
         function ($json) {
             echo 'Measurement #', $json->msm_id, ' "', $json->description, '" had ', $json->participant_count, ' nodes involved', PHP_EOL;
         },
-        function (\Rx\React\HttpResponseException $e) {
-            echo "Error: ", $e->getMessage(), PHP_EOL;
+        function (HttpResponseException $e) {
+            echo 'Error: ', $e->getMessage(), PHP_EOL;
         },
         function () {
-            echo "complete", PHP_EOL;
+            echo 'complete', PHP_EOL;
         }
     );
 
 $probesSubscription = $urls
     ->filter(function ($url) {
-        return substr($url->expanded_url, 0, 30) == 'https://atlas.ripe.net/probes/';
-    })->map(function ($url) {
+        return 0 === strpos($url->expanded_url, 'https://atlas.ripe.net/probes/');
+    })
+    ->map(function ($url) {
         return trim(substr($url->expanded_url, 30), '/');
-    })->flatMap(function ($id) {
-        return \Rx\React\Http::get("https://atlas.ripe.net/api/v1/probe/{$id}/");
-    })->map(function ($data) {
-        return json_decode($data);
-    })->subscribe(
+    })
+    ->flatMap(function ($id) {
+        return Http::get("https://atlas.ripe.net/api/v1/probe/{$id}/");
+    })
+    ->map('json_decode')
+    ->subscribe(
         function ($json) {
             echo 'Probe #', $json->id, ' connected since ' . date('r', $json->status_since), PHP_EOL;
         },
-        function (\Exception $e) {
-            echo "Error: ", $e->getMessage(), PHP_EOL;
+        function (\Throwable $e) {
+            echo 'Error: ', $e->getMessage(), PHP_EOL;
         },
         function () {
-            echo "complete", PHP_EOL;
+            echo 'complete', PHP_EOL;
         }
     );

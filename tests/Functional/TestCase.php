@@ -1,30 +1,29 @@
 <?php
 
-
 namespace Rx\React\Tests\Functional;
-
 
 use React\HttpClient\Request;
 use React\Promise\Promise;
+use React\Socket\ConnectorInterface;
+use React\Stream\ReadableStreamInterface;
 use Rx\React\HttpObservable;
 use Rx\Scheduler;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
-
     protected $connector;
     protected $stream;
 
     public function setUp()
     {
-        $this->stream = $this->getMockBuilder('React\Stream\Stream')
+        $this->stream = $this->getMockBuilder(ReadableStreamInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->connector = $this->createMock('React\SocketClient\ConnectorInterface');
+        $this->connector = $this->createMock(ConnectorInterface::class);
 
         $this->connector->expects($this->once())
-            ->method('create')
+            ->method('connect')
             ->willReturnCallback(function () {
 
                 return new Promise(function () {
@@ -32,21 +31,16 @@ class TestCase extends \PHPUnit_Framework_TestCase
             });
     }
 
-    /**
-     * @param Request $request
-     * @param $method
-     * @param $url
-     * @param null $body
-     * @param array $headers
-     * @param string $protocolVersion
-     * @param bool $bufferResults
-     * @param bool $includeResponse
-     * @return HttpObservable
-     */
-    protected function createHttpObservable(Request $request, $method, $url, $body = null, array $headers = [], $protocolVersion = '1.0', $bufferResults = true, $includeResponse = false)
+    protected function createHttpObservable(
+        Request $request,
+        string $method,
+        string $url,
+        string $body = null,
+        array $headers = [],
+        string $protocolVersion = '1.1'
+    ): HttpObservable
     {
-
-        $reflection      = new \ReflectionClass('Rx\React\HttpObservable');
+        $reflection      = new \ReflectionClass(HttpObservable::class);
         $client_property = $reflection->getProperty('client');
         $client_property->setAccessible(true);
 
@@ -57,8 +51,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'body'            => $body,
             'headers'         => $headers,
             'protocolVersion' => $protocolVersion,
-            'bufferResults'   => $bufferResults,
-            'includeResponse' => $includeResponse,
             'scheduler'       => Scheduler::getImmediate()
         ];
 
@@ -72,5 +64,4 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         return $httpObservable;
     }
-
 }
