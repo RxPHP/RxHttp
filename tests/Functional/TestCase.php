@@ -9,12 +9,12 @@ use React\Stream\ReadableStreamInterface;
 use Rx\React\HttpObservable;
 use Rx\Scheduler;
 
-class TestCase extends \PHPUnit_Framework_TestCase
+class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected $connector;
     protected $stream;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->stream = $this->getMockBuilder(ReadableStreamInterface::class)
             ->disableOriginalConstructor()

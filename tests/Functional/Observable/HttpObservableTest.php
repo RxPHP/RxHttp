@@ -253,7 +253,7 @@ class HttpObservableTest extends TestCase
         $response->emit('data', [$testData3, $response]);
         $response->emit('end');
 
-        $this->assertEquals($error->getBody(), $testData1 + $testData2 + $testData3);
+        $this->assertEquals($error->getBody(), $testData1 . $testData2 . $testData3);
         $this->assertFalse($complete);
     }
 
