@@ -98,6 +98,11 @@ final class HttpObservable extends Observable
             });
         });
         $request->end($this->body);
+        
+        $request->on('error', function ($e) use ($observer) {
+            $error = new \Exception($e);
+            $observer->onError($error);
+        });
 
         return new CallbackDisposable(function () use ($request) {
             $request->close();
